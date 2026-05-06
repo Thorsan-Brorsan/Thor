@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binära Talsystemet</title>
+
+<style>
+body {
+    background-color: #0b0f0b;
+    color: #00ff88;
+    font-family: monospace;
+    text-align: center;
+    padding: 10px;
+    margin: 0;
+}
+
+/* 📦 Gör appen kompakt */
+.app {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: clamp(22px, 5vw, 32px);
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.box {
+    width: clamp(45px, 14vw, 70px);
+    height: clamp(45px, 14vw, 70px);
+    border: 2px solid #00ff88;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: #001a00;
+    font-size: clamp(14px, 3.5vw, 18px);
+    border-radius: 6px;
+}
+
+.box.active {
+    background-color: #00ff88;
+    color: black;
+}
+
+.text {
+    margin: 8px;
+    font-size: clamp(14px, 3.5vw, 20px);
+}
+
+.quiz {
+    margin-top: 20px;
+    border-top: 2px solid #00ff88;
+    padding-top: 15px;
+}
+
+input, button {
+    padding: 10px;
+    font-size: 14px;
+    width: 90%;
+    max-width: 260px;
+    margin: 6px;
+    border-radius: 6px;
+}
+
+button {
+    background-color: #001a00;
+    color: #00ff88;
+    border: 2px solid #00ff88;
+    cursor: pointer;
+}
+
+.stats {
+    margin-top: 15px;
+    font-size: 16px;
+    border-top: 2px solid #00ff88;
+    padding-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>Binära Talsystemet</h1>
+
+<div class="container">
+    <div class="box" onclick="toggleBox(0)">128</div>
+    <div class="box" onclick="toggleBox(1)">64</div>
+    <div class="box" onclick="toggleBox(2)">32</div>
+    <div class="box" onclick="toggleBox(3)">16</div>
+    <div class="box" onclick="toggleBox(4)">8</div>
+    <div class="box" onclick="toggleBox(5)">4</div>
+    <div class="box" onclick="toggleBox(6)">2</div>
+    <div class="box" onclick="toggleBox(7)">1</div>
+</div>
+
+<div class="text" id="addition">Addition: 0</div>
+<div class="text" id="sum">Summa (decimal): 0</div>
+<div class="text" id="binary">Binärt: 00000000</div>
+
+<div class="quiz">
+    <h2>NP-uppgift</h2>
+    <div id="question"></div>
+    <input type="text" id="answer" placeholder="Ditt svar">
+    <br>
+    <button onclick="checkAnswer()">Kontrollera</button>
+    <div id="result"></div>
+</div>
+
+<div class="stats" id="stats">
+    Rätt: 0 | Fel: 0 | Träffsäkerhet: 0% | Betyg: -
+</div>
+
+</div>
+
+<script>
+let values = [128,64,32,16,8,4,2,1];
+let active = new Array(8).fill(false);
+
+function toggleBox(index) {
+    const boxes = document.querySelectorAll(".box");
+    active[index] = !active[index];
+    boxes[index].classList.toggle("active");
+    update();
+}
+
+function update() {
+    let sum = 0;
+    let additions = [];
+
+    for (let i = 0; i < 8; i++) {
+        if (active[i]) {
+            sum += values[i];
+            additions.push(values[i]);
+        }
+    }
+
+    document.getElementById("addition").innerText =
+        "Addition: " + (additions.length ? additions.join(" + ") : "0");
+
+    document.getElementById("sum").innerText =
+        "Summa (decimal): " + sum;
+
+    document.getElementById("binary").innerText =
+        "Binärt: " + active.map(v => v ? 1 : 0).join("");
+}
+
+function resetBoxes() {
+    active = new Array(8).fill(false);
+    document.querySelectorAll(".box").forEach(b => b.classList.remove("active"));
+    update();
+}
+
+let correctAnswer = "";
+let correctCount = 0;
+let wrongCount = 0;
+
+function newQuestion() {
+    resetBoxes();
+
+    document.getElementById("result").innerText = "";
+    document.getElementById("answer").value = "";
+
+    let num = Math.floor(Math.random() * 256);
+
+    if (Math.random() < 0.5) {
+        correctAnswer = num.toString(2);
+        document.getElementById("question").innerText =
+            "Skriv " + num + " i binärt:";
+    } else {
+        correctAnswer = num.toString();
+        document.getElementById("question").innerText =
+            "Vad är " + num.toString(2) + " i decimal form?";
+    }
+}
+
+function updateStats() {
+    let total = correctCount + wrongCount;
+    let percent = total ? (correctCount / total) * 100 : 0;
+
+    document.getElementById("stats").innerText =
+        "Rätt: " + correctCount +
+        " | Fel: " + wrongCount +
+        " | Träffsäkerhet: " + percent.toFixed(1) + "%";
+}
+
+function checkAnswer() {
+    let user = document.getElementById("answer").value.trim();
+
+    if (user === correctAnswer) {
+        correctCount++;
+        document.getElementById("result").innerText = "✅ Rätt!";
+    } else {
+        wrongCount++;
+        document.getElementById("result").innerText =
+            "❌ Fel. Rätt svar: " + correctAnswer;
+    }
+
+    updateStats();
+    setTimeout(newQuestion, 1500);
+}
+
+newQuestion();
+</script>
+
+</body>
+</html>
